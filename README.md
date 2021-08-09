@@ -9,6 +9,12 @@ npm run dev
 # or
 yarn dev
 ```
+Install dependencies:
+
+```bash
+yarn add apollo-server-micro graphql mongodb
+yarn add graphql-tools
+```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
@@ -18,6 +24,23 @@ You can start editing the page by modifying `pages/index.js`. The page auto-upda
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
+## API for graphQL:
+
+http://localhost:3000/api/graphql
+
+Sample Query:
+
+```json
+query Query {
+  charity {
+    charity_contact_email
+    charity_contact_web
+    charity_name
+    charity_registration_status
+    registered_charity_number
+  }
+}
+```
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
