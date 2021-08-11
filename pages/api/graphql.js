@@ -2,6 +2,8 @@
 import { ApolloServer, gql } from 'apollo-server-micro'
 import { makeExecutableSchema } from 'graphql-tools'
 import { MongoClient } from 'mongodb'
+import { PrismaClient } from '@prisma/client'
+import { json } from 'micro'
 
 require('dotenv').config()
 
@@ -23,14 +25,18 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    charity: (_parent, _args, _context, _info) => {
-        return _context.db
-        .collection('charity')
-        .find({}).toArray()
+    charity: async (_parent, _args, _context, _info) => {
+        // return _context.db
+        // .collection('charity')
+        // .find({}).toArray()
+        const charities = await _context.prisma.charity.findMany()
+        console.log(charities)
+        return charities
     },
   },
 }
 
+const prisma = new PrismaClient()
 
 const schema = makeExecutableSchema({
     typeDefs,
@@ -39,26 +45,33 @@ const schema = makeExecutableSchema({
 
 let db
 
+// const apolloServer = new ApolloServer({
+//     schema,
+//     context: async () => {
+//       if (!db) {
+//         try {
+//           const dbClient = new MongoClient(process.env.MONGO_DB_URI,
+//             {
+//               useNewUrlParser: true,
+//               useUnifiedTopology: true,
+//             }
+//           )
+  
+//           await dbClient.connect()
+//           db = dbClient.db('charities-extract-1000') // database name
+//         } catch (e) {
+//           console.log('--->error while connecting with graphql context (db)', e)
+//         }
+//       }
+  
+//       return { db }
+//     },
+//   })
+
 const apolloServer = new ApolloServer({
     schema,
-    context: async () => {
-      if (!db) {
-        try {
-          const dbClient = new MongoClient(process.env.MONGO_DB_URI,
-            {
-              useNewUrlParser: true,
-              useUnifiedTopology: true,
-            }
-          )
-  
-          await dbClient.connect()
-          db = dbClient.db('charities-extract-1000') // database name
-        } catch (e) {
-          console.log('--->error while connecting with graphql context (db)', e)
-        }
-      }
-  
-      return { db }
+    context: {
+      prisma
     },
   })
 
@@ -83,6 +96,7 @@ export default async function handler(req, res) {
     }
   
     await startServer
+    await prisma.$connect()
     await apolloServer.createHandler({
       path: '/api/graphql',
     })(req, res)

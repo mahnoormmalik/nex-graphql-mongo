@@ -1,0 +1,24 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["mongodb"]
+}
+
+model Charity {
+      id                            String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+      organisation_number           Int
+      registered_charity_number     Int
+      charity_registration_status   String
+      charity_name                  String
+      latest_income                 Int
+      latest_expenditure            Int
+      charity_contact_email         String
+      charity_contact_web           String
+  }
